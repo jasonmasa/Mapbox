@@ -1,0 +1,68 @@
+body { margin:0; padding:0; }
+
+#map { position:absolute; top:0; bottom:0; width:100%; }
+
+.marker {
+  background-image: url('geophy-map-marker.png');
+  background-size: cover;
+  width: 27px;
+  height: 45px;
+}
+
+.reachMarker {
+  background-image: url('Reach-Marker-30W.png');
+  background-size: cover;
+  width: 30px;
+  height: 15px;
+}
+
+.mapboxgl-popup {
+max-width: 400px;
+font-family: 'Bebas Neue Pro Bold', sans-serif;
+font-weight: 400;
+color: #1a5c7f;
+}
+
+#reachButtons {
+background: #fff;
+position: absolute;
+z-index: 1;
+top: 10px;
+left: 10px;
+border-radius: 3px;
+width: 120px;
+border: 1px solid rgba(255,255,255,1);
+font-family: 'Lato', sans-serif;
+font-weight: 300;
+}
+
+#reachButtons a {
+font-size: 13px;
+color: #404040;
+display: block;
+margin: 0;
+padding: 0;
+padding: 10px;
+text-decoration: none;
+border-bottom: 1px solid rgba(255,255,255,1);
+text-align: center;
+}
+
+#reachButtons a:last-child {
+border: none;
+}
+
+#reachButtons a:hover {
+background-color: #bee5e0;
+color: #fff;
+}
+
+
+#reachButtons a.active {
+background-color: #91d9cf;
+color: #ffffff;
+}
+
+#reachButtons a.active:hover {
+background: #bee5e0;
+}

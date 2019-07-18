@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Reval Map Prototype</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <!-- Reference to the Mapbox API (map controls and basemap tiles) -->
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css' rel='stylesheet' />
+
+
+    <!-- Reference to the styles for the html elements (map, map marker, buttons and popups) -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<!-- Reach area buttons and the 'map' div -->
+<nav id="reachButtons"></nav>
+<div id='map'></div>
+
+
+
+
+
+
+<!-- MAPBOX GL JS. All map functionality (zoom-in/out, data layers, popups, etc.)
+is written with this code  -->
+
+
+<script>
+
+// Lat/long values of the property input by the user. The values below are simply
+// an example set of coordinates.
+var inputProperty = [-111.997297, 33.625017];
+
+// Amenities data as geojson (in this example it's restaurants)
+var amenitiesAll = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/Amenities-No-Transit.geojson'
+var amenitiesOutside = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/Amenities-Outside.geojson'
+var education = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/Education.geojson'
+var healthcare = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/Healthcare.geojson'
+var nightlife = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/Nightlife.geojson'
+var retail = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/Retail.geojson'
+var restaurants = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/Restaurants.geojson'
+var transit = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/Transit.geojson'
+
+
+// Reach areas as geojson
+var reachWalk = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/Reach-Walk.geojson'
+var reachDrive = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/Reach-Drive.geojson'
+
+
+// Reach markers
+var reachMarkers = 'https://raw.githubusercontent.com/jasonmasa/geojson/master/REACH-Markers.geojson'
+
+// Colours
+var reachFill = '#1a6f7f'
+var GPblue = '#1a5c7f'
+var GPmint = '#6edbcc'
+
+
+// Clever Franke colours
+var CFlightBlue = '#45a2f2'
+var CFbluePurple = '#5b77cb'
+var CFpurple = '#ba47a6'
+var CFpink = '#ff4596'
+
+// Geophy colours
+var blue = '#3fa9f5'
+var orange = '#ffb600'
+var purple = '#9b85f9'
+var navy = '#21309e'
+var green = '#02c987'
+var pink = '#ff4b97'
+
+var reachOutlineOpacity = 1
+var reachOutlineWeight = 1
+
+var reachHighlightOpacity = 0.15
+var reachHighlightWeight = 8
+
+
+
+
+
+
+
+// Creates the map object and displays it in the 'map' div using a Mapbox access token and link to the styled basemap tiles
+mapboxgl.accessToken = 'pk.eyJ1Ijoiai1nZW8iLCJhIjoiY2p0enJ3aXBqMGRoZDQ1cDlhcnN3NDJtcCJ9.xI9LbuSbStySy4LBwU58mQ';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/j-geo/cjxu6hpoz02bi1cmwyyxtkbzo',
+    center: inputProperty,
+    zoom: 13.5,
+    pitch: 40
+});
+
+
+
+
+
+// Map zoom button
+map.addControl(new mapboxgl.NavigationControl());
+
+// Actions performed after map loads on page
+map.on('load', function () {
+
+    //Map marker set as a geojson with coordinates (lat/long) taken from the user's input (inputProperty)
+    var mapMarker = {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: inputProperty
+        }
+      }]
+    };
+
+
+
+
+
+
+    // Creates a map marker
+    mapMarker.features.forEach(function(marker) {
+
+      // Creates a HTML element and sets the background image with Geophy-Map-Marker.png
+      var el = document.createElement('div');
+      el.className = 'marker';
+
+      // Adds the marker to the map
+      new mapboxgl.Marker(el, {anchor: 'bottom'})
+      .setLngLat(marker.geometry.coordinates)
+      .addTo(map);
+    });
+
+
+
+
+
+
+
+
+    map.addLayer({
+      'id': 'Reach-Walk-Outline',
+      'type': 'line',
+      'source': {
+        'type': 'geojson',
+        'data': reachWalk
+      },
+      'paint': {
+        'line-color': GPblue,
+        'line-opacity': reachOutlineOpacity,
+        'line-width': reachOutlineWeight
+      }
+    }, 'aerialway');
+
+
+    //Reach highlights
+
+    map.addLayer({
+      'id': 'Reach-Walk-Highlight',
+      'type': 'line',
+      'source': {
+        'type': 'geojson',
+        'data': reachWalk
+      },
+      'paint': {
+        'line-color': GPblue,
+        'line-opacity': reachHighlightOpacity,
+        'line-width': {
+          'stops': [[5, 2], [13, 8], [16, 16]]
+          }
+      }
+    }, 'aerialway');
+
+
+
+
+
+
+
+
+    map.addLayer({
+      'id': 'Reach-Drive-Outline',
+      'type': 'line',
+      'source': {
+        'type': 'geojson',
+        'data': reachDrive
+      },
+      'paint': {
+        'line-color': GPblue,
+        'line-opacity': reachOutlineOpacity,
+        'line-width': reachOutlineWeight
+      }
+    }, 'aerialway');
+
+
+    //Reach highlights
+
+    map.addLayer({
+      'id': 'Reach-Drive-Highlight',
+      'type': 'line',
+      'source': {
+        'type': 'geojson',
+        'data': reachDrive
+      },
+      'paint': {
+        'line-color': GPblue,
+        'line-opacity': reachHighlightOpacity,
+        'line-width': {
+          'stops': [[5, 2], [13, 8], [16, 16]]
+          }
+      }
+    }, 'aerialway');
+
+
+
+
+
+
+
+
+
+
+
+    map.addLayer({
+      id: 'Reach Markers',
+      type: 'symbol',
+      // Add a GeoJSON source containing place coordinates and information.
+      source: {
+        type: 'geojson',
+        data: reachMarkers
+      },
+      layout: {
+        'icon-image': [
+          'match',
+          ['get', 'REACH'],
+          'WALK15', 'Reach-Marker-15W',
+          'WALK30', 'Reach-Marker-30W',
+          'DRIVE15', 'Reach-Marker-15D',
+          'Reach-Marker-30D'
+        ],
+        'icon-allow-overlap': false
+      }
+    });
+
+
+
+
+
+
+
+
+
+    //Adds the amenity points to the map
+    map.addLayer({
+      'id': 'Amenities-Highlight',
+      'type': 'circle',
+      'source': {
+        type: 'geojson',
+        data: amenitiesAll
+      },
+      'paint': {
+        // Amenity point highlights resize depending on the map's zoom level
+        'circle-radius': {
+          'stops': [[10, 0], [16, 13], [18, 21]]
+          },
+        'circle-color': [
+          'match',
+          ['get', 'type'],
+          'education', blue,
+          'restaurant', orange,
+          'retail', pink,
+          'nighlife', navy,
+          'healthcare', green,
+          '#777'
+        ],
+        'circle-opacity': 0.4
+      }
+    }, 'settlement-subdivision-label');
+
+
+    map.addLayer({
+      'id': 'Amenities',
+      'type': 'circle',
+      'source': {
+        type: 'geojson',
+        data: amenitiesAll
+      },
+      'paint': {
+        // Amenity points resize depending on the map's zoom level
+        'circle-radius': {
+          'stops': [[8, 1], [13, 5], [22, 10]]
+        },
+        'circle-stroke-width': 1,
+        'circle-stroke-color': '#fff',
+        'circle-color': [
+          'match',
+          ['get', 'type'],
+          'education', blue,
+          'restaurant', orange,
+          'retail', pink,
+          'nighlife', navy,
+          'healthcare', green,
+          '#777'
+        ]
+      }
+    }, 'settlement-subdivision-label');
+
+
+
+
+
+
+
+    map.addLayer({
+      'id': 'Amenities-Outside',
+      'type': 'circle',
+      'source': {
+        type: 'geojson',
+        data: amenitiesOutside
+      },
+      'paint': {
+        // Amenity points resize depending on the map's zoom level
+        'circle-radius': {
+          'stops': [[8, 1], [13, 4], [22, 8]]
+        },
+        'circle-stroke-width': 1,
+        'circle-stroke-color': '#fff',
+        'circle-color': '#baced9'
+      }
+    }, 'settlement-subdivision-label');
+
+
+
+
+
+
+
+
+
+    // Popups displaying amenity name
+    var popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false
+    });
+
+    map.on('mouseenter', 'Amenities', function(e) {
+        // Changes the cursor style
+        map.getCanvas().style.cursor = 'pointer';
+
+        var coordinates = e.features[0].geometry.coordinates.slice();
+        var amenityName = e.features[0].properties.name;
+
+        // Populate the popup and set its coordinates based on the amenity being hovered over
+        popup.setLngLat(coordinates)
+            .setHTML(amenityName)
+            .addTo(map);
+    });
+
+    map.on('mouseleave', 'Amenities', function() {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });
+
+});
+
+
+
+</script>
+
+
+</body>
+</html>
